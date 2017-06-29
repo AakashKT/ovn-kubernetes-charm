@@ -1,0 +1,15 @@
+name: k8s-minion
+summary: <Fill in summary here>
+maintainer: Aakash <Aakash@localhost>
+description: |
+  <Multi-line description here>
+tags:
+  # Replace "misc" with one or more whitelisted tags from this list:
+  # https://jujucharms.com/docs/stable/authors-charm-metadata
+  - misc
+subordinate: false
+
+requires:
+  ovn-central-comms:
+    interface: ovn-central-comms
+

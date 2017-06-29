@@ -1,0 +1,366 @@
+{
+  "layers": [
+    "layer:basic", 
+    "layer:openvswitch", 
+    "k8s-master", 
+    "interface:ovn-central-comms", 
+    "build"
+  ], 
+  "signatures": {
+    ".build.manifest": [
+      "build", 
+      "dynamic", 
+      "unchecked"
+    ], 
+    ".gitignore": [
+      "layer:basic", 
+      "static", 
+      "0da5c4dcda27cd6406e5bb81cbf68ddccaf728ac764ec15053a165c1449d87d9"
+    ], 
+    "Makefile": [
+      "layer:basic", 
+      "static", 
+      "b7ab3a34e5faf79b96a8632039a0ad0aa87f2a9b5f0ba604e007cafb22190301"
+    ], 
+    "README.ex": [
+      "k8s-master", 
+      "static", 
+      "eb25333fb6ee2abc2d5dde329dfd6b4b2a6dd5516094e75354fb6cd84010afad"
+    ], 
+    "README.md": [
+      "layer:basic", 
+      "static", 
+      "81752bbec9629772edf48191912d3bf2d9190081de862fa2d005c21064f238bd"
+    ], 
+    "bin/layer_option": [
+      "layer:basic", 
+      "static", 
+      "621b556cd208005e131e9f648859294347da9376609745a73ca2e808dd2032f9"
+    ], 
+    "config.yaml": [
+      "k8s-master", 
+      "dynamic", 
+      "8f2680233043fcf666743b1b4d0dd3e36bd386faecabef269e290bd8db308bcb"
+    ], 
+    "copyright": [
+      "layer:basic", 
+      "static", 
+      "f6740d66fd60b60f2533d9fcb53907078d1e20920a0219afce7182e2a1c97629"
+    ], 
+    "deps/layer/basic/.gitignore": [
+      "layer:openvswitch", 
+      "static", 
+      "0da5c4dcda27cd6406e5bb81cbf68ddccaf728ac764ec15053a165c1449d87d9"
+    ], 
+    "deps/layer/basic/Makefile": [
+      "layer:openvswitch", 
+      "static", 
+      "b7ab3a34e5faf79b96a8632039a0ad0aa87f2a9b5f0ba604e007cafb22190301"
+    ], 
+    "deps/layer/basic/README.md": [
+      "layer:openvswitch", 
+      "static", 
+      "81752bbec9629772edf48191912d3bf2d9190081de862fa2d005c21064f238bd"
+    ], 
+    "deps/layer/basic/bin/layer_option": [
+      "layer:openvswitch", 
+      "static", 
+      "621b556cd208005e131e9f648859294347da9376609745a73ca2e808dd2032f9"
+    ], 
+    "deps/layer/basic/copyright": [
+      "layer:openvswitch", 
+      "static", 
+      "f6740d66fd60b60f2533d9fcb53907078d1e20920a0219afce7182e2a1c97629"
+    ], 
+    "deps/layer/basic/hooks/config-changed": [
+      "layer:openvswitch", 
+      "static", 
+      "f976e7ff3e347d44dac22626507f2a88042ba913aeebca7ffdcd5f6179b83683"
+    ], 
+    "deps/layer/basic/hooks/hook.template": [
+      "layer:openvswitch", 
+      "static", 
+      "f976e7ff3e347d44dac22626507f2a88042ba913aeebca7ffdcd5f6179b83683"
+    ], 
+    "deps/layer/basic/hooks/install": [
+      "layer:openvswitch", 
+      "static", 
+      "f976e7ff3e347d44dac22626507f2a88042ba913aeebca7ffdcd5f6179b83683"
+    ], 
+    "deps/layer/basic/hooks/leader-elected": [
+      "layer:openvswitch", 
+      "static", 
+      "f976e7ff3e347d44dac22626507f2a88042ba913aeebca7ffdcd5f6179b83683"
+    ], 
+    "deps/layer/basic/hooks/leader-settings-changed": [
+      "layer:openvswitch", 
+      "static", 
+      "f976e7ff3e347d44dac22626507f2a88042ba913aeebca7ffdcd5f6179b83683"
+    ], 
+    "deps/layer/basic/hooks/start": [
+      "layer:openvswitch", 
+      "static", 
+      "f976e7ff3e347d44dac22626507f2a88042ba913aeebca7ffdcd5f6179b83683"
+    ], 
+    "deps/layer/basic/hooks/stop": [
+      "layer:openvswitch", 
+      "static", 
+      "f976e7ff3e347d44dac22626507f2a88042ba913aeebca7ffdcd5f6179b83683"
+    ], 
+    "deps/layer/basic/hooks/update-status": [
+      "layer:openvswitch", 
+      "static", 
+      "f976e7ff3e347d44dac22626507f2a88042ba913aeebca7ffdcd5f6179b83683"
+    ], 
+    "deps/layer/basic/hooks/upgrade-charm": [
+      "layer:openvswitch", 
+      "static", 
+      "8fb6559bf4d4b7cdf1b857564c1d7265df98e863a4746fcbae092f141e59d97e"
+    ], 
+    "deps/layer/basic/layer.yaml": [
+      "layer:openvswitch", 
+      "static", 
+      "fbd3e3a22f3b8b1e7656e12f5db0ebf69c145b8e8b59c125e6faf043cba50b9b"
+    ], 
+    "deps/layer/basic/lib/charms/layer/__init__.py": [
+      "layer:openvswitch", 
+      "static", 
+      "71a8b901f7e64a6b1b61959fc25819bafc9c9905e37a918615b9f949295095a4"
+    ], 
+    "deps/layer/basic/lib/charms/layer/basic.py": [
+      "layer:openvswitch", 
+      "static", 
+      "d09706ef3a224eb60d34366a2867c382791aa30157ab5b77eda37f29731df2e2"
+    ], 
+    "deps/layer/basic/lib/charms/layer/execd.py": [
+      "layer:openvswitch", 
+      "static", 
+      "af1f2409869f990cdb33cffc4120fb6713876e8e680ac5f064ea510bbdca1073"
+    ], 
+    "deps/layer/basic/metadata.yaml": [
+      "layer:openvswitch", 
+      "static", 
+      "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+    ], 
+    "deps/layer/basic/reactive/__init__.py": [
+      "layer:openvswitch", 
+      "static", 
+      "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    ], 
+    "deps/layer/basic/requirements.txt": [
+      "layer:openvswitch", 
+      "static", 
+      "0f1c70d27e26005a96d66ad54482877ae20f7737693c833e29dd72bd6ac24892"
+    ], 
+    "deps/layer/basic/tox.ini": [
+      "layer:openvswitch", 
+      "static", 
+      "00b57a776ac313e92a52daa05d1fdb6056c21b3105b643d32610fd937664321b"
+    ], 
+    "deps/layer/basic/wheelhouse.txt": [
+      "layer:openvswitch", 
+      "static", 
+      "2f19b10e72d7299f4fc53c33caa0ad425ebcef59231238b49bc45b10ab49ae16"
+    ], 
+    "hooks/config-changed": [
+      "layer:basic", 
+      "static", 
+      "f976e7ff3e347d44dac22626507f2a88042ba913aeebca7ffdcd5f6179b83683"
+    ], 
+    "hooks/hook.template": [
+      "layer:basic", 
+      "static", 
+      "f976e7ff3e347d44dac22626507f2a88042ba913aeebca7ffdcd5f6179b83683"
+    ], 
+    "hooks/install": [
+      "layer:basic", 
+      "static", 
+      "f976e7ff3e347d44dac22626507f2a88042ba913aeebca7ffdcd5f6179b83683"
+    ], 
+    "hooks/leader-elected": [
+      "layer:basic", 
+      "static", 
+      "f976e7ff3e347d44dac22626507f2a88042ba913aeebca7ffdcd5f6179b83683"
+    ], 
+    "hooks/leader-settings-changed": [
+      "layer:basic", 
+      "static", 
+      "f976e7ff3e347d44dac22626507f2a88042ba913aeebca7ffdcd5f6179b83683"
+    ], 
+    "hooks/ovn-central-comms-relation-broken": [
+      "interface:ovn-central-comms", 
+      "dynamic", 
+      "f976e7ff3e347d44dac22626507f2a88042ba913aeebca7ffdcd5f6179b83683"
+    ], 
+    "hooks/ovn-central-comms-relation-changed": [
+      "interface:ovn-central-comms", 
+      "dynamic", 
+      "f976e7ff3e347d44dac22626507f2a88042ba913aeebca7ffdcd5f6179b83683"
+    ], 
+    "hooks/ovn-central-comms-relation-departed": [
+      "interface:ovn-central-comms", 
+      "dynamic", 
+      "f976e7ff3e347d44dac22626507f2a88042ba913aeebca7ffdcd5f6179b83683"
+    ], 
+    "hooks/ovn-central-comms-relation-joined": [
+      "interface:ovn-central-comms", 
+      "dynamic", 
+      "f976e7ff3e347d44dac22626507f2a88042ba913aeebca7ffdcd5f6179b83683"
+    ], 
+    "hooks/relations/ovn-central-comms/__init__.py": [
+      "interface:ovn-central-comms", 
+      "static", 
+      "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    ], 
+    "hooks/relations/ovn-central-comms/interface.yaml": [
+      "interface:ovn-central-comms", 
+      "static", 
+      "e138281ce5109c92582fcd31b2a2e1fd86fcf57ad95fde12b5af7b68be289846"
+    ], 
+    "hooks/relations/ovn-central-comms/provides.py": [
+      "interface:ovn-central-comms", 
+      "static", 
+      "fffc5868e6481a750ece2842e1c94f3e4481f1867806cb7b4c0708742dc0a6af"
+    ], 
+    "hooks/relations/ovn-central-comms/requires.py": [
+      "interface:ovn-central-comms", 
+      "static", 
+      "46e46d2b18e6c084c96f048d07aafa665b62cb46f47719104e270ef174664144"
+    ], 
+    "hooks/start": [
+      "layer:basic", 
+      "static", 
+      "f976e7ff3e347d44dac22626507f2a88042ba913aeebca7ffdcd5f6179b83683"
+    ], 
+    "hooks/stop": [
+      "layer:basic", 
+      "static", 
+      "f976e7ff3e347d44dac22626507f2a88042ba913aeebca7ffdcd5f6179b83683"
+    ], 
+    "hooks/update-status": [
+      "layer:basic", 
+      "static", 
+      "f976e7ff3e347d44dac22626507f2a88042ba913aeebca7ffdcd5f6179b83683"
+    ], 
+    "hooks/upgrade-charm": [
+      "layer:basic", 
+      "static", 
+      "8fb6559bf4d4b7cdf1b857564c1d7265df98e863a4746fcbae092f141e59d97e"
+    ], 
+    "icon.svg": [
+      "k8s-master", 
+      "static", 
+      "085f367baa9c4ec724561b6e0d5d167c14c4295d6311b719a57729a17ac025c7"
+    ], 
+    "layer.yaml": [
+      "k8s-master", 
+      "dynamic", 
+      "2b90a98b0689cca64bc602f2d962fa96c6c6c2723a88c3ae1e8285daee0d235d"
+    ], 
+    "lib/charms/layer/__init__.py": [
+      "layer:basic", 
+      "static", 
+      "71a8b901f7e64a6b1b61959fc25819bafc9c9905e37a918615b9f949295095a4"
+    ], 
+    "lib/charms/layer/basic.py": [
+      "layer:basic", 
+      "static", 
+      "d09706ef3a224eb60d34366a2867c382791aa30157ab5b77eda37f29731df2e2"
+    ], 
+    "lib/charms/layer/execd.py": [
+      "layer:basic", 
+      "static", 
+      "af1f2409869f990cdb33cffc4120fb6713876e8e680ac5f064ea510bbdca1073"
+    ], 
+    "metadata.yaml": [
+      "k8s-master", 
+      "dynamic", 
+      "426fc95c4b70d5b3d7bd9bb2b7442092af9ee96fbf0e37551fcdc325078a8f3e"
+    ], 
+    "reactive/__init__.py": [
+      "layer:basic", 
+      "static", 
+      "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    ], 
+    "reactive/k8s_master.py": [
+      "k8s-master", 
+      "static", 
+      "24b1d854d88b96980efab1bf1b088e7f7e1a57860c48d392adcfd6ea7f7da938"
+    ], 
+    "reactive/openvswitch.py": [
+      "layer:openvswitch", 
+      "static", 
+      "64ba71ca9d6ad52665ea682ee4f41d7aab9be135bf23acb28e10db84c2ca69c1"
+    ], 
+    "requirements.txt": [
+      "layer:basic", 
+      "static", 
+      "0f1c70d27e26005a96d66ad54482877ae20f7737693c833e29dd72bd6ac24892"
+    ], 
+    "tests/00-setup": [
+      "k8s-master", 
+      "static", 
+      "111c079b81d260bbcd716dcf41672372a4cf4aaa14154b6c3055deeedae37a06"
+    ], 
+    "tests/10-deploy": [
+      "k8s-master", 
+      "static", 
+      "ff28fb743b46c7d318696afc0cd1881eef84df9bb5b449a17aba8a2bbce4c0fd"
+    ], 
+    "tox.ini": [
+      "layer:basic", 
+      "static", 
+      "00b57a776ac313e92a52daa05d1fdb6056c21b3105b643d32610fd937664321b"
+    ], 
+    "wheelhouse/Jinja2-2.9.6.tar.gz": [
+      "layer:basic", 
+      "dynamic", 
+      "ddaa01a212cd6d641401cb01b605f4a4d9f37bfc93043d7f760ec70fb99ff9ff"
+    ], 
+    "wheelhouse/MarkupSafe-1.0.tar.gz": [
+      "layer:basic", 
+      "dynamic", 
+      "a6be69091dac236ea9c6bc7d012beab42010fa914c459791d627dad4910eb665"
+    ], 
+    "wheelhouse/PyYAML-3.12.tar.gz": [
+      "layer:basic", 
+      "dynamic", 
+      "592766c6303207a20efc445587778322d7f73b161bd994f227adaa341ba212ab"
+    ], 
+    "wheelhouse/Tempita-0.5.2.tar.gz": [
+      "layer:basic", 
+      "dynamic", 
+      "cacecf0baa674d356641f1d406b8bff1d756d739c46b869a54de515d08e6fc9c"
+    ], 
+    "wheelhouse/charmhelpers-0.16.0.tar.gz": [
+      "layer:basic", 
+      "dynamic", 
+      "5727a1dc278416d3e0b432ae9d46f599bca1c61b17f4880e5d33553d249b7cb3"
+    ], 
+    "wheelhouse/charms.reactive-0.4.7.tar.gz": [
+      "layer:basic", 
+      "dynamic", 
+      "f023f5aef267786db1be51209610487171ba56e848f7b1c49877b06337000256"
+    ], 
+    "wheelhouse/netaddr-0.7.19.tar.gz": [
+      "layer:basic", 
+      "dynamic", 
+      "38aeec7cdd035081d3a4c306394b19d677623bf76fa0913f6695127c7753aefd"
+    ], 
+    "wheelhouse/pip-8.1.2.tar.gz": [
+      "layer:basic", 
+      "dynamic", 
+      "4d24b03ffa67638a3fa931c09fd9e0273ffa904e95ebebe7d4b1a54c93d7b732"
+    ], 
+    "wheelhouse/pyaml-16.12.2.tar.gz": [
+      "layer:basic", 
+      "dynamic", 
+      "b865e4f53a85f4d8a092e7701f759a3237fb3ee8a928627401914aafadc00907"
+    ], 
+    "wheelhouse/six-1.10.0.tar.gz": [
+      "layer:basic", 
+      "dynamic", 
+      "105f8d68616f8248e24bf0e9372ef04d3cc10104f1980f54d57b2ce73a5ad56a"
+    ]
+  }
+}

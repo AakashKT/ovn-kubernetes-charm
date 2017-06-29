@@ -1,0 +1,12 @@
+"options":
+  "basic":
+    "use_venv": !!bool "false"
+    "packages": []
+    "include_system_packages": !!bool "false"
+  "k8s-master": {}
+  "openvswitch": {}
+"includes":
+- "layer:basic"
+- "layer:openvswitch"
+- "interface:ovn-central-comms"
+"is": "k8s-master"
