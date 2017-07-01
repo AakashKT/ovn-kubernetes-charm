@@ -12,7 +12,7 @@ source env-setup.sh
 charm build ovn-central
 charm build k8s-master
 charm build k8s-minion
-charm build k8s-gateway 
+charm build k8s-gateway
 </pre>
 <br>
 Charms :
@@ -27,7 +27,7 @@ Relations :
 <ul>
 <li>ovn-central --- k8s-master</li>
 <li>ovn-central --- k8s-minion</li>
-<li>ovn-central -- k8s-gateway</li>
-
-
-
+<li>ovn-central --- k8s-gateway</li>
+<li>k8s-master --- k8s-gateway</li>
+<li>k8s-master --- k8s-minion</li>
+</ul>

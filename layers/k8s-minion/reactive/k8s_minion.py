@@ -21,9 +21,9 @@ from charmhelpers.fetch import (
 )
 
 from charms.reactive import (
-    when, 
-    when_not, 
-    hook, 
+    when,
+    when_not,
+    hook,
     set_state
 )
 
@@ -53,36 +53,33 @@ def get_my_ip():
 # Hooks and reactive handlers
 #########################################################################
 
+@when('k8s-master-config.available')
 @when_not('k8s-minion.installed')
-@when('onetime-setup.done')
-def install_k8s_minion():
-
-    run_command('ovs-vsctl set Open_vSwitch . external_ids:k8s-api-server="$(cat /tmp/central_ip):8080" ');
+def install_k8s_minion(k8s_master):
+    k8s_api_ip = k8s_master.get_config('k8s_api_ip');
+    run_command('ovs-vsctl set Open_vSwitch . \
+                external_ids:k8s-api-server="%s:8080"' % (k8s_api_ip));
 
     run_command('git clone https://github.com/openvswitch/ovn-kubernetes /tmp/ovn-kubernetes');
     os.chdir('/tmp/ovn-kubernetes');
     run_command('sudo pip2 install .');
     run_command('ovn-k8s-overlay minion-init --cluster-ip-subnet="192.168.0.0/16" \
-                    --master-switch-subnet="192.168.2.0/24" --node-name="kube-minion1" ')
+                    --minion-switch-subnet="192.168.2.0/24" --node-name="kube-minion1" ')
 
     set_state('k8s-minion.installed')
 
 
-@when('ovn-central-comms.available')
+@when('ovn-central-config.available')
 @when_not('onetime-setup.done')
-def onetime_setup(ovn):
-    central_ip = ovn.get_central_ip();
+def onetime_setup(ovn_central):
+    central_ip = ovn_central.get_config('central_ip');
     local_ip = get_my_ip();
-
-    f = open('/tmp/central_ip', 'w');
-    f.write(central_ip);
-    f.close();
 
     run_command('ovs-vsctl set Open_vSwitch . external_ids:ovn-remote="tcp:%s:6642" \
                         external_ids:ovn-nb="tcp:%s:6641" \
                         external_ids:ovn-encap-ip=%s \
                         external_ids:ovn-encap-type="%s"' % (central_ip, central_ip, local_ip, 'stt'));
-    
+
     run_command('ovs-vsctl set Open_vSwitch . external_ids:system-id=$(uuidgen)');
     run_command('/usr/share/openvswitch/scripts/ovn-ctl start_controller');
 

@@ -21,9 +21,9 @@ from charmhelpers.fetch import (
 )
 
 from charms.reactive import (
-    when, 
-    when_not, 
-    hook, 
+    when,
+    when_not,
+    hook,
     set_state
 )
 
@@ -55,6 +55,7 @@ def get_my_ip():
 
 @when_not('ovn-central.installed')
 def install_ovn_central():
+    onetime_setup();
 
     run_command('/usr/share/openvswitch/scripts/ovn-ctl start_northd');
 
@@ -64,21 +65,27 @@ def install_ovn_central():
     set_state('ovn-central.installed')
 
 
-@when('ovn-central-comms.available', 'ovn-central.installed')
-@when_not('onetime-setup.done')
-def broadcast_and_setup(ovn):
+@when('ovn-central-config.available', 'ovn-central.installed')
+def broadcast_config(ovn_central):
+    central_ip = get_my_ip();
 
+    config = {
+        'central_ip' : central_ip,
+    };
+    ovn_central.send_config(config);
+
+
+#########################################################################
+# Helper functions
+#########################################################################
+
+def onetime_setup():
     central_ip = get_my_ip();
 
     run_command('ovs-vsctl set Open_vSwitch . external_ids:ovn-remote="tcp:%s:6642" \
                         external_ids:ovn-nb="tcp:%s:6641" \
                         external_ids:ovn-encap-ip=%s \
                         external_ids:ovn-encap-type="%s"' % (central_ip, central_ip, central_ip, 'stt'));
-    
+
     run_command('ovs-vsctl set Open_vSwitch . external_ids:system-id=$(uuidgen)');
     run_command('/usr/share/openvswitch/scripts/ovn-ctl start_controller');
-
-    ovn.send_ip(central_ip);
-
-    set_state('onetime-setup.done');
-

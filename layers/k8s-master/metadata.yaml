@@ -8,7 +8,9 @@ tags:
   # https://jujucharms.com/docs/stable/authors-charm-metadata
   - misc
 subordinate: false
+provides:
+  k8s-master-config:
+    interface: k8s-master-config
 requires:
-  ovn-central-comms:
-    interface: ovn-central-comms
-
+  ovn-central-config:
+    interface: ovn-central-config
