@@ -8,8 +8,3 @@ tags:
   # https://jujucharms.com/docs/stable/authors-charm-metadata
   - misc
 subordinate: false
-requires:
-  ovn-central-config:
-    interface: ovn-central-config
-  k8s-master-config:
-    interface: k8s-master-config

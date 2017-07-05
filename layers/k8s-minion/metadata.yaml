@@ -9,7 +9,5 @@ tags:
   - misc
 subordinate: false
 requires:
-  ovn-central-config:
+  central-config:
     interface: ovn-central-config
-  k8s-master-config:
-    interface: k8s-master-config

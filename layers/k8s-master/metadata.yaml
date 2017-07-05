@@ -1,6 +1,6 @@
 name: k8s-master
 summary: <Fill in summary here>
-maintainer: Aakash <Aakash@localhost>
+maintainer: AakashKT <AakashKT@aakashkts-macbook-pro.local>
 description: |
   <Multi-line description here>
 tags:
@@ -9,8 +9,5 @@ tags:
   - misc
 subordinate: false
 provides:
-  k8s-master-config:
-    interface: k8s-master-config
-requires:
-  ovn-central-config:
+  central-config:
     interface: ovn-central-config

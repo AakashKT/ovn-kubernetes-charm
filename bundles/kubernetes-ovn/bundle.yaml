@@ -1,0 +1,72 @@
+series: xenial
+
+applications:
+  kubernetes-master:
+    charm: "cs:~containers/kubernetes-master-19"
+    num_units: 1
+    to:
+      - "0"
+    expose: true
+
+  k8s-master:
+    charm: "cs:~aakashkt/trusty/k8s-master-0"
+    num_units: 1
+    to:
+      - "0"
+
+  k8s-gateway1:
+    charm: "cs:~aakashkt/trusty/k8s-gateway-0"
+    num_units: 1
+    to:
+      - "0"
+
+  kubernetes-worker:
+    charm: "cs:~containers/kubernetes-worker-23"
+    num_units: 1
+    to:
+      - "1"
+    expose: true
+
+  k8s-minion:
+    charm: "cs:~aakashkt/trusty/k8s-minion-0"
+    num_units: 1
+    to:
+      - "1"
+
+  k8s-gateway2:
+    charm: "cs:~aakashkt/trusty/k8s-gateway-0"
+    num_units: 1
+    to:
+      - "1"
+
+  etcd:
+    charm: "cs:etcd-34"
+    num_units: 1
+    to:
+      - "0"
+
+  easyrsa:
+    charm: "cs:~containers/easyrsa-9"
+    num_units: 1
+    to:
+      - "1"
+
+relations:
+  - - "k8s-master:central-config"
+    - "k8s-minion:central-config"
+  - - "etcd:certificates"
+    - "easyrsa:client"
+  - - "kubernetes-worker:certificates"
+    - "easyrsa:client"
+  - - "kubernetes-master:etcd"
+    - "etcd:db"
+  - - "kubernetes-master:certificates"
+    - "easyrsa:client"
+  - - "kubernetes-master:kube-control"
+    - "kubernetes-worker:kube-control"
+
+machines:
+  "0":
+    series: xenial
+  "1":
+    series: xenial

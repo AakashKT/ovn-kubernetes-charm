@@ -9,13 +9,13 @@ class TestCharm(unittest.TestCase):
     def setUp(self):
         self.d = amulet.Deployment()
 
-        self.d.add('k8s-master')
-        self.d.expose('k8s-master')
+        self.d.add('ovn-central')
+        self.d.expose('ovn-central')
 
         self.d.setup(timeout=900)
         self.d.sentry.wait()
 
-        self.unit = self.d.sentry['k8s-master'][0]
+        self.unit = self.d.sentry['ovn-central'][0]
 
     def test_service(self):
         # test we can access over http
