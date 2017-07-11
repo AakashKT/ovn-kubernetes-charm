@@ -1,0 +1,5 @@
+options:
+  gateway-physical-interface:
+    type: string
+    default: "none"
+    description: "The interface used by gateway nodes for north-south connectivity"
