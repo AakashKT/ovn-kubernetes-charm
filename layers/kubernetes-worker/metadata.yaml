@@ -1,4 +1,4 @@
-name: ovn
+name: kubernetes-worker
 summary: <Fill in summary here>
 maintainer: Aakash <Aakash@localhost>
 description: |
@@ -7,17 +7,14 @@ tags:
   # Replace "misc" with one or more whitelisted tags from this list:
   # https://jujucharms.com/docs/stable/authors-charm-metadata
   - misc
-subordinate: true
+subordinate: false
 provides:
-  kube-api-endpoint:
-    interface: http
-requires:
   cni:
     interface: kubernetes-cni
     scope: container
-peers:
-  master-config:
-    interface: master-config
+requires:
+  k8s-config:
+    interface: k8s-config
 
 series:
   - xenial

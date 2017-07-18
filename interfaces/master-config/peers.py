@@ -5,7 +5,7 @@ from charms.reactive import hook, RelationBase, scopes
 
 class MasterConfigPeer(RelationBase):
 
-	scope = scopes.GLOBAL;
+	scope = scopes.UNIT;
 
 	@hook("{peers:master-config}-relation-{joined}")
 	def joined(self):
@@ -16,19 +16,27 @@ class MasterConfigPeer(RelationBase):
 	def changed(self):
 		conv = self.conversation();
 		if conv.get_remote('central_ip'):
-			conv.set_state("{relation_name}.available");
+			conv.set_state("{relation_name}.master.available");
+		elif conv.get_remote('cert_to_sign'):
+			conv.set_state("{relation_name}.worker.available");
 
 	@hook("{peers:master-config}-relation-{departed}")
 	def departed(self):
 		conv = self.conversation();
-		conv.remove_state("{relation_name}.available");
+		conv.remove_state("{relation_name}.connected");
 
 	def send_config(self, config):
-		conv = self.conversation();
-		conv.set_remote(data=config);
+		convs = self.conversations();
+
+		for conv in convs:
+			conv.set_remote(data=config);
 
 	def get_config(self, key):
-		conv = self.conversation();
-		value = conv.get_remote(key);
+		convs = self.conversations();
 
-		return value;
+		final = [];
+		for conv in convs:
+			if conv.get_remote(key):
+				final.append(conv.get_remote(key));
+
+		return final;

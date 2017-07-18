@@ -9,6 +9,7 @@ applications:
       - "0"
     expose: true
     options:
+      service-cidr: 192.168.200.0/24
       channel: 1.5/stable
 
   kubernetes-worker:
@@ -21,7 +22,7 @@ applications:
       channel: 1.5/stable
 
   ovn:
-    charm: "cs:~aakashkt/ovn-2"
+    charm: "/home/aakash/Desktop/ovn-kubernetes-charm/xenial/ovn"
     options:
       gateway-physical-interface: "ens4"
 
@@ -38,7 +39,7 @@ applications:
       - "1"
 
 relations:
-  - - "kubernetes-master:kube-api-endpoint"
+  - - "ovn:kube-api-endpoint"
     - "kubernetes-worker:kube-api-endpoint"
   - - "kubernetes-master:kube-control"
     - "kubernetes-worker:kube-control"
