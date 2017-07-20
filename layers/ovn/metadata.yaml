@@ -8,9 +8,6 @@ tags:
   # https://jujucharms.com/docs/stable/authors-charm-metadata
   - misc
 subordinate: true
-provides:
-  kube-api-endpoint:
-    interface: http
 requires:
   cni:
     interface: kubernetes-cni

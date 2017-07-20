@@ -70,6 +70,8 @@ def configure_cni(cni):
 @when_not('services.installed')
 def start_worker_services(worker):
     hookenv.status_set('maintenance', 'Starting worker');
+    hookenv.open_port(8080);
+
     master_ip = worker.get_config('master_ip');
 
     k8s_processes = open('/tmp/k8s.sh', 'w+');
@@ -91,7 +93,7 @@ def start_worker_services(worker):
 @when_not('kubernetes-worker.installed')
 def install_kubernetes_worker():
     hookenv.status_set('maintenance', 'Installing kubernetes');
-    channel = '1.5/stable';
+    hookenv.open_port(8080);
 
     run_command('sudo apt-get install -y docker.io');
 

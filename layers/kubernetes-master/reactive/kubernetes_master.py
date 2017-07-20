@@ -78,6 +78,7 @@ def configure_cni(cni):
 @when_not('services.started')
 def start_master_services():
     hookenv.status_set('maintenance', 'Starting master');
+    hookenv.open_port(8080);
 
     run_command('sudo docker run --net=host \
                     -d gcr.io/google_containers/etcd:2.0.12 /usr/local/bin/etcd \

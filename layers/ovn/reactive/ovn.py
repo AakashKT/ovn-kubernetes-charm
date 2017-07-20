@@ -99,6 +99,8 @@ def receive_data(cni, worker):
     cert_list = worker.get_config('signed_cert');
     master_ip = worker.get_config('central_ip')[0];
 
+    cni.set_config(cidr='192.168.0.0/16');
+
     for cert in cert_list:
         os.chdir('/etc/openvswitch');
         cert_file = open('/etc/openvswitch/ovncontroller-cert.pem', 'a');
@@ -138,7 +140,6 @@ def install_master(cni):
 
     hookenv.open_port(6641);
     hookenv.open_port(6642);
-    hookenv.open_port(8080);
 
     central_ip = get_my_ip();
     hostname = run_command('hostname').replace('\n', '');
@@ -199,7 +200,6 @@ def install_master(cni):
 
 def install_worker(central_ip):
     hookenv.status_set('maintenance', 'Initialising worker network');
-    hookenv.open_port(8080);
 
     config = hookenv.config();
     local_ip = get_my_ip();
@@ -252,7 +252,7 @@ def install_ovn(is_master):
 
     interface = config['gateway-physical-interface'];
     if(interface == 'none'):
-        interface = run_command('ip route get 8.8.8.8 | awk "{ print $5; exit }"').replace('\n', '');
+        interface = run_command('ip route | grep default').replace('\n', '').split(' ')[4];
 
     op = run_command('ovn-k8s-util nics-to-bridge %s' % (interface));
     log('Bridge create output :');
