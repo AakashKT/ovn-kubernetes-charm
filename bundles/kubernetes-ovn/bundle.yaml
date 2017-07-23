@@ -22,9 +22,9 @@ applications:
       channel: 1.5/stable
 
   ovn:
-    charm: "cs:~aakashkt/ovn-6"
+    charm: "cs:~aakashkt/ovn-11"
     options:
-      gateway-physical-interface: "ens4"
+      gateway-physical-interface: "none"
 
   etcd:
     charm: "cs:~containers/etcd-40"

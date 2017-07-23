@@ -60,7 +60,7 @@ def get_my_ip():
 
 @hook('install')
 def install_dependencies():
-    hookenv.status_set('maintenance', 'Installing deps');
+    hookenv.status_set('maintenance', 'Installing dependencies for OVS');
 
     run_command('sudo apt-get update ; sudo apt-get upgrade ; sudo apt-get install git -y');
 
