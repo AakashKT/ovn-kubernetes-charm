@@ -8,7 +8,7 @@ juju deploy bundle.yaml
 ip route | grep default
 Output : default via 192.168.0.1 dev <b>wlp1s0</b>  proto static  metric 600
 </pre>
-Choose the highlighted word.
+Choose the highlighted word.<br>
 <b>Note:</b> For now, please run the following commands once done deploying. These commands are to be run on the worker node.
 <pre>
 sudo cp /root/cdk/ca.crt /etc/openvswitch/k8s-ca.crt
