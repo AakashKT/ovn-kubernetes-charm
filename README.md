@@ -1,7 +1,9 @@
 # ovn-kubernetes-charm
 <h3>Deploy the bundle</h3>
+<pre>
 cd bundles/kubernetes-ovn/
 juju deploy bundle.yaml
+</pre>
 <hr>
 <b>Note:</b> Get the value for config option in OVN, "gateway-physical-interface" by running the following on your machine:
 <pre>
