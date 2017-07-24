@@ -19,6 +19,8 @@ sudo ovs-vsctl set Open_vSwitch .   external_ids:k8s-api-server="https://$K8S_AP
 sudo ovn-k8s-watcher --overlay --pidfile --log-file -vfile:info -vconsole:emer --detach
 sudo ovn-k8s-gateway-helper --physical-bridge=_gateway-physical-interface_ --physical-interface=br_gateway-physical-interface_ --pidfile --detach
 </pre>
+
+Get the API_TOKEN from /root/cdk/kubeconfig file on the master, it will be given as "token : ....".
 Get node name (_masterNodeName_) by running "hostname" command.<br>
 
 Steps to build the charm for Ubuntu Xenial:
