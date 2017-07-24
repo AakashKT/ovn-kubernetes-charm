@@ -16,10 +16,8 @@ K8S_API_SERVER_IP="_masterNodeName_:6443"
 API_TOKEN="_someToken_"
 sudo ovs-vsctl set Open_vSwitch .   external_ids:k8s-api-server="https://$K8S_API_SERVER_IP" external_ids:k8s-api-token="$API_TOKEN"
 
-sudo ovn-k8s-watcher --overlay --pidfile --log-file -vfile:info \
-                    -vconsole:emer --detach
-sudo ovn-k8s-gateway-helper --physical-bridge=_gateway-physical-interface_ \
-                        --physical-interface=br_gateway-physical-interface_ --pidfile --detach
+sudo ovn-k8s-watcher --overlay --pidfile --log-file -vfile:info -vconsole:emer --detach
+sudo ovn-k8s-gateway-helper --physical-bridge=_gateway-physical-interface_ --physical-interface=br_gateway-physical-interface_ --pidfile --detach
 </pre>
 Get node name (_masterNodeName_) by running "hostname" command.<br>
 
