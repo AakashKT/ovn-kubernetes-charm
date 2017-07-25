@@ -22,7 +22,7 @@ applications:
       channel: 1.5/stable
 
   ovn:
-    charm: "cs:~aakashkt/ovn-11"
+    charm: "/home/aakash/Desktop/ovn-kubernetes-charm/xenial/ovn"
     options:
       gateway-physical-interface: "none"
 

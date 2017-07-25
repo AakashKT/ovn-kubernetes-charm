@@ -27,6 +27,7 @@ from charmhelpers.fetch import (
 from charms.reactive import (
     when,
     when_not,
+    when_file_changed,
     hook,
     set_state,
     remove_state
@@ -114,10 +115,22 @@ def install_deps():
 
 ''' Master reactive handlers '''
 
+@when('master.initialised')
+def restart_services():
+    new_interface = retrieve('new_interface');
+    old_interface = retrieve('old_interface');
+
+    run_command('sudo ovn-k8s-watcher --overlay --pidfile \
+                    --log-file -vfile:info -vconsole:emer --detach');
+    run_command('sudo ovn-k8s-gateway-helper --physical-bridge=%s \
+                    --physical-interface=%s \
+                    --pidfile --detach' % (new_interface, old_interface));
+
 @when('master.initialised', 'master-config.worker.available')
 def sign_and_send(master):
     cert_list = master.get_config('cert_to_sign');
     central_ip = get_my_ip();
+    hostname = run_command('hostname');
 
     for cert in cert_list:
         os.chdir('/tmp/');
@@ -130,7 +143,8 @@ def sign_and_send(master):
         signed_cert = cert_file.read();
         master.send_config({
             'signed_cert': signed_cert,
-            'central_ip': central_ip
+            'central_ip': central_ip,
+            'hostname' : hostname
         });
 
 @when('cni.is-master', 'master.initialised')
@@ -257,6 +271,23 @@ def bridge_setup(cni):
 
 ''' Worker reactive handlers '''
 
+@when('cni.is-worker', 'worker.data.registered')
+@when_not('k8s.worker.certs.setup')
+def setup_k8s_worker_certs(cni):
+    if os.path.isfile('/root/cdk/kubeconfig') and os.path.isfile('/root/cdk/ca.crt'):
+        set_state('k8s.worker.certs.setup');
+
+        master_hostname = retrieve('master_hostname');
+
+        k8s_api_ip = "%s:6443" % (master_hostname);
+        api_token = run_command('sudo awk \'$1=="token:" {print $2}\' /root/cdk/kubeconfig');
+
+        run_command('sudo cp /root/cdk/ca.crt /etc/openvswitch/k8s-ca.crt');
+        run_command('sudo ovs-vsctl set Open_vSwitch .   \
+                        external_ids:k8s-api-server="https://%s" \
+                        external_ids:k8s-api-token="%s"' % (k8s_api_ip, api_token));
+
+
 @when('cni.is-worker', 'master-config.master.available', 'worker.setup.done')
 @when_not('worker.initialised')
 def initialise_worker(cni, mconfig):
@@ -281,7 +312,7 @@ def initialise_worker(cni, mconfig):
     hookenv.status_set('active', 'Worker subnet : 192.168.2.0/24');
     set_state('worker.initialised');
 
-@when('cni.is-worker', 'master-config.master.available', 'worker.cert.registered',
+@when('cni.is-worker', 'master-config.master.available', 'worker.data.registered',
             'worker.kv.setup')
 @when_not('worker.setup.done')
 def worker_setup(cni, mconfig):
@@ -312,12 +343,15 @@ def worker_setup(cni, mconfig):
     set_state('worker.setup.done');
 
 @when('cni.is-worker', 'master-config.master.available')
-@when_not('worker.cert.registered')
-def receive_cert(cni, mconfig):
+@when_not('worker.data.registered')
+def receive_data(cni, mconfig):
     hookenv.status_set('maintenance', 'Certificate received')
 
     cert_list = mconfig.get_config('signed_cert')[0];
     master_ip = mconfig.get_config('central_ip')[0];
+    master_hostname = mconfig.get_config('hostname')[0];
+
+    store('master_hostname', master_hostname);
     cni.set_config(cidr='192.168.0.0/16');
 
     for cert in cert_list:
@@ -326,7 +360,7 @@ def receive_cert(cni, mconfig):
         cert_file.write(cert);
         cert_file.close();
 
-    set_state('worker.cert.registered');
+    set_state('worker.data.registered');
 
 @when('cni.is-worker', 'master-config.connected')
 @when_not('worker.cert.sent')
