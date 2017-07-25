@@ -3,6 +3,9 @@
 <pre>
 cd bundles/kubernetes-ovn/
 juju deploy bundle.yaml
+</pre>
+<b>Note:</b> Of course, you have to have juju bootstraped to a cloud env first. Have a look at https://jujucharms.com/docs/stable/getting-started
+<br>
 
 Steps to build the charm for Ubuntu Xenial:
 <pre>
