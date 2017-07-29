@@ -126,26 +126,27 @@ def restart_services():
                     --physical-interface=%s \
                     --pidfile --detach' % (new_interface, old_interface));
 
-@when('master.initialised', 'master-config.worker.available')
+@when('master.initialised', 'master-config.worker.cert.available')
 def sign_and_send(master):
-    cert_list = master.get_config('cert_to_sign');
+    cert = master.get_config('cert_to_sign');
     central_ip = get_my_ip();
     hostname = run_command('hostname');
 
-    for cert in cert_list:
-        os.chdir('/tmp/');
-        cert_file = open('/tmp/ovncontroller-req.pem', 'w+');
-        cert_file.write(cert);
-        cert_file.close();
-        run_command('sudo ovs-pki -d /certs/pki -b sign ovncontroller switch --force');
+    os.chdir('/tmp/');
+    cert_file = open('/tmp/ovncontroller-req.pem', 'w+');
+    cert_file.truncate(0);
+    cert_file.seek(0, 0);
+    cert_file.write(cert);
+    cert_file.close();
+    run_command('sudo ovs-pki -d /certs/pki -b sign ovncontroller switch --force');
 
-        cert_file = open('ovncontroller-cert.pem', 'r');
-        signed_cert = cert_file.read();
-        master.send_config({
-            'signed_cert': signed_cert,
-            'central_ip': central_ip,
-            'hostname' : hostname
-        });
+    cert_file = open('ovncontroller-cert.pem', 'r');
+    signed_cert = cert_file.read();
+    master.send_config({
+        'signed_cert': signed_cert,
+        'central_ip': central_ip,
+        'hostname' : hostname
+    });
 
 @when('cni.is-master', 'master.initialised')
 @when_not('gateway.installed')
@@ -211,16 +212,14 @@ def master_setup(cni):
 
     central_ip = get_my_ip();
 
-    run_command('sudo /usr/share/openvswitch/scripts/ovn-ctl start_northd');
-    run_command('sudo ovn-nbctl set-connection pssl:6641');
-    run_command('sudo ovn-sbctl set-connection pssl:6642');
-
     os.chdir('/etc/openvswitch');
     run_command('sudo ovs-pki -d /certs/pki init --force');
     run_command('sudo cp /certs/pki/switchca/cacert.pem /etc/openvswitch/');
+
     run_command('sudo ovs-pki req ovnnb --force && sudo ovs-pki self-sign ovnnb --force');
     run_command('sudo ovn-nbctl set-ssl /etc/openvswitch/ovnnb-privkey.pem \
                     /etc/openvswitch/ovnnb-cert.pem  /certs/pki/switchca/cacert.pem');
+
     run_command('sudo ovs-pki req ovnsb --force && sudo ovs-pki self-sign ovnsb --force');
     run_command('sudo ovn-sbctl set-ssl /etc/openvswitch/ovnsb-privkey.pem \
                     /etc/openvswitch/ovnsb-cert.pem  /certs/pki/switchca/cacert.pem');
@@ -233,6 +232,10 @@ def master_setup(cni):
         --ovn-controller-ssl-cert=/etc/openvswitch/ovncontroller-cert.pem \
         --ovn-controller-ssl-bootstrap-ca-cert=/etc/openvswitch/ovnsb-ca.cert"');
     ovn_host_file.close();
+
+    run_command('sudo /usr/share/openvswitch/scripts/ovn-ctl start_northd');
+    run_command('sudo ovn-nbctl set-connection pssl:6641');
+    run_command('sudo ovn-sbctl set-connection pssl:6642');
 
     run_command('sudo ovs-vsctl set Open_vSwitch . external_ids:ovn-remote="ssl:%s:6642" \
                     external_ids:ovn-nb="ssl:%s:6641" \
@@ -342,23 +345,22 @@ def worker_setup(cni, mconfig):
                     restart_controller');
     set_state('worker.setup.done');
 
-@when('cni.is-worker', 'master-config.master.available')
+@when('cni.is-worker', 'master-config.master.data.available')
 @when_not('worker.data.registered')
 def receive_data(cni, mconfig):
     hookenv.status_set('maintenance', 'Certificate received')
 
-    cert_list = mconfig.get_config('signed_cert')[0];
+    cert = mconfig.get_config('signed_cert')[0];
     master_ip = mconfig.get_config('central_ip')[0];
     master_hostname = mconfig.get_config('hostname')[0];
 
     store('master_hostname', master_hostname);
     cni.set_config(cidr='192.168.0.0/16');
 
-    for cert in cert_list:
-        os.chdir('/etc/openvswitch');
-        cert_file = open('/etc/openvswitch/ovncontroller-cert.pem', 'a');
-        cert_file.write(cert);
-        cert_file.close();
+    os.chdir('/etc/openvswitch');
+    cert_file = open('/etc/openvswitch/ovncontroller-cert.pem', 'a');
+    cert_file.write(cert);
+    cert_file.close();
 
     set_state('worker.data.registered');
 

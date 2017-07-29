@@ -1,2 +1,0 @@
-includes: ['layer:basic', 'layer:snap', 'interface:kubernetes-cni',
-              'interface:k8s-config']  # if you use any interfaces, add them here
