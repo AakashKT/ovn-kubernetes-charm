@@ -74,6 +74,9 @@ def retrieve(key):
         return data[key];
 
 def store(key, value):
+    conf = open('/tmp/ovn_conf', 'w+');
+    conf.close();
+    
     conf = open('/tmp/ovn_conf', 'r');
     plain_text = conf.read();
     conf.close();
