@@ -284,6 +284,7 @@ def bridge_setup(cni):
 	set_state('bridge.setup.done');
 
 
+
 ''' Worker reactive handlers '''
 
 @when('cni.is-worker', 'worker.data.registered')
@@ -303,13 +304,13 @@ def setup_k8s_worker_certs(cni):
 						external_ids:k8s-api-token="%s"' % (k8s_api_ip, api_token));
 
 
-@when('cni.is-worker', 'master-config.master.available', 'worker.setup.done')
+@when('cni.is-worker', 'worker.setup.done')
 @when_not('worker.initialised')
-def initialise_worker(cni, mconfig):
+def initialise_worker(cni):
 	hookenv.status_set('maintenance', 'Initialising worker network');
 
 	local_ip = get_my_ip();
-	central_ip = mconfig.get_config('central_ip')[0];
+	central_ip = retrieve('central_ip');
 	hostname = run_command('hostname').replace('\n', '');
 
 	run_command('ovs-vsctl set Open_vSwitch . \
@@ -327,15 +328,15 @@ def initialise_worker(cni, mconfig):
 	hookenv.status_set('active', 'Worker subnet : 192.168.2.0/24');
 	set_state('worker.initialised');
 
-@when('cni.is-worker', 'master-config.master.available', 'worker.data.registered',
-			'worker.kv.setup')
+@when('cni.is-worker', 'worker.data.registered', 'worker.kv.setup')
 @when_not('worker.setup.done')
-def worker_setup(cni, mconfig):
+def worker_setup(cni):
 	hookenv.status_set('maintenance', 'Setting up worker');
 	hookenv.open_ports(1, 79);
 	hookenv.open_ports(81, 442);
 	hookenv.open_ports(444, 65535);
-	central_ip = mconfig.get_config('central_ip')[0];
+
+	central_ip = retrieve('central_ip');
 	local_ip = get_my_ip();
 
 	run_command('sudo ovs-vsctl set Open_vSwitch . \
@@ -369,6 +370,7 @@ def receive_data(cni, mconfig):
 	master_hostname = data['master_hostname'];
 
 	store('master_hostname', master_hostname);
+	store('central_ip', master_ip);
 	cni.set_config(cidr='192.168.0.0/16');
 
 	os.chdir('/etc/openvswitch');
@@ -378,7 +380,7 @@ def receive_data(cni, mconfig):
 
 	set_state('worker.data.registered');
 
-@when('cni.is-worker', 'master-config.connected')
+@when('cni.is-worker', 'master-config.connected', 'worker.kv.setup')
 @when_not('worker.cert.sent')
 def send_cert(cni, mconfig):
 	os.chdir('/etc/openvswitch');
@@ -395,8 +397,9 @@ def send_cert(cni, mconfig):
 	hookenv.status_set('maintenance', 'Waiting for certificate');
 	set_state('worker.cert.sent');
 
+@when('cni.is-worker')
 @when_not('worker.kv.setup')
-def setup_kv():
+def setup_worker_kv():
 	interface = get_config('gateway-physical-interface');
 	if interface == 'none' or interface == None:
 		op = run_command('ip route | grep default').split(' ');
