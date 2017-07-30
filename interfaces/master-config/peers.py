@@ -101,7 +101,7 @@ def store(key, value):
 
 class MasterConfigPeer(RelationBase):
 
-	scope = scopes.GLOBAL;
+	scope = scopes.UNIT;
 
 	@hook("{peers:master-config}-relation-{joined}")
 	def joined(self):
@@ -144,18 +144,21 @@ class MasterConfigPeer(RelationBase):
 		return final_data;
 
 	def send_worker_data(self, data):
-		self.conversation().set_remote(data=data);
+		convs = self.conversations();
+
+		for conv in convs:
+			conv.set_remote(data=data);
 
 
 	def send_signed_certs(self, certs):
-
+		certs_str = json.dumps(certs);
 		for conv in self.conversations():
-			conv.set_remote(data=certs);
+			conv.set_remote(key="data", value=certs_str);
 
 	def get_signed_cert(self, worker_hostname):
 		conv = self.conversation();
 		
-		data = conv.get_remote(worker_hostname);
+		data = conv.get_remote('data');
 		data = json.loads(data);
 
-		return data;
+		return data[worker_hostname];
