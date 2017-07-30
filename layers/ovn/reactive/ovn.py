@@ -24,6 +24,11 @@ from charmhelpers.fetch import (
 	apt_upgrade
 )
 
+from charms.reactive.helpers import (
+	mark_invoked,
+	was_invoked,
+)
+
 from charms.reactive import (
 	when,
 	when_not,
