@@ -151,9 +151,9 @@ def sign_and_send(mconfig):
 		signed_cert = cert_file.read();
 
 		signed_certs[worker_hostname] = {
-			'central_ip': central_ip,
-			'signed_cert': signed_cert,
-			'master_hostname': master_hostname, 
+			"central_ip": central_ip,
+			"signed_cert": signed_cert,
+			"master_hostname": master_hostname, 
 		};
 	
 	mconfig.send_signed_certs(signed_certs);

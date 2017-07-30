@@ -154,4 +154,8 @@ class MasterConfigPeer(RelationBase):
 
 	def get_signed_cert(self, worker_hostname):
 		conv = self.conversation();
-		return conv.get_remote(worker_hostname);
+		
+		data = conv.get_remote(worker_hostname);
+		data = json.loads(data);
+
+		return data;
