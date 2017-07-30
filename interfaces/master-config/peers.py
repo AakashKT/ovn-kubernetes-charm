@@ -1,7 +1,103 @@
 import os
+import json
+import re
+import sys
+import subprocess
+import time
+import urllib.request as urllib2
+import multiprocessing as mp
 
 from charmhelpers.core import hookenv
-from charms.reactive import hook, RelationBase, scopes
+from charmhelpers.core import host
+
+from charmhelpers.core.host import (
+	service_start,
+	service_stop,
+	log,
+	mkdir,
+	write_file,
+)
+
+from charmhelpers.fetch import (
+	apt_install,
+	apt_update,
+	apt_upgrade
+)
+
+from charms.reactive import (
+	when,
+	when_not,
+	when_file_changed,
+	hook,
+	RelationBase,
+	scopes,
+	set_state,
+	remove_state
+)
+
+
+CONF_FILE = '/tmp';
+
+
+#########################################################################
+# Common functions
+#########################################################################
+
+def run_command(command=None):
+
+	if command is None:
+		return False;
+
+	log('Running Command "%s"' % command);
+	try:
+		return subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT).decode('utf-8').replace('\n', '');
+	except subprocess.CalledProcessError as e:
+		log('Error running "%s" : %s' % (command, e.output));
+
+		return False;
+
+def get_config(key):
+	config = hookenv.config(key);
+	return config;
+
+def retrieve(key):
+	try:
+		conf = open('/tmp/ovn_conf', 'r');
+	except:
+		return '';
+
+	plain_text = conf.read();
+	conf.close();
+	if plain_text == '':
+		return '';
+	else:
+		data = json.loads(plain_text);
+		return data[key];
+
+def store(key, value):
+	conf = open('/tmp/ovn_conf', 'w+');
+	conf.close();
+
+	conf = open('/tmp/ovn_conf', 'r');
+	plain_text = conf.read();
+	conf.close();
+
+	conf = open('/tmp/ovn_conf', 'w+');
+
+	data = {};
+	if plain_text != '':
+		data = json.loads(plain_text);
+	data[key] = value;
+
+	conf.truncate(0);
+	conf.seek(0, 0);
+	conf.write(json.dumps(data));
+	conf.close();
+
+
+#########################################################################
+# Relation Class
+#########################################################################
 
 class MasterConfigPeer(RelationBase):
 
@@ -9,29 +105,53 @@ class MasterConfigPeer(RelationBase):
 
 	@hook("{peers:master-config}-relation-{joined}")
 	def joined(self):
-		conv = self.conversation(scope=scopes.UNIT);
+		conv = self.conversation();
 		conv.set_state("{relation_name}.connected");
 
 	@hook("{peers:master-config}-relation-{changed}")
 	def changed(self):
-		conv = self.conversation(scope=scopes.UNIT);
-		if conv.get_remote('central_ip'):
+		hostname = run_command('hostname');
+
+		conv = self.conversation();
+		if conv.get_remote(hostname):
 			conv.set_state("{relation_name}.master.data.available");
 		elif conv.get_remote('cert_to_sign'):
 			conv.set_state("{relation_name}.worker.cert.available");
 
 	@hook("{peers:master-config}-relation-{departed}")
 	def departed(self):
-		conv = self.conversation(scope=scopes.UNIT);
+		conv = self.conversation();
 
 		conv.remove_state("{relation_name}.connected");
 		conv.remove_state("{relation_name}.master.ip.available");
 		conv.remove_state("{relation_name}.worker.cert.available");
 
-	def send_config(self, config):
-		conv = self.conversation(scope=scopes.UNIT);
-		conv.set_remote(data=config);
+	def get_worker_data(self):
+		convs = self.conversations();
 
-	def get_config(self, key):
-		conv = self.conversation(scope=scopes.UNIT);
-		return conv.get_remote(key);
+		final_data = [];
+		for conv in convs:
+			worker_unit = {};
+
+			cert = conv.get_remote('cert_to_sign');
+			worker_hostname = conv.get_remote('worker_hostname');
+
+			worker_unit['cert_to_sign'] = cert;
+			worker_unit['worker_hostname'] = worker_hostname;
+
+			final_data.append(worker_unit);
+
+		return final_data;
+
+	def send_worker_data(self, data):
+		self.conversation().set_remote(data=data);
+
+
+	def send_signed_certs(self, certs):
+
+		for conv in self.conversations():
+			conv.set_remote(data=certs);
+
+	def get_signed_cert(self, worker_hostname):
+		conv = self.conversation();
+		return conv.get_remote(worker_hostname);
