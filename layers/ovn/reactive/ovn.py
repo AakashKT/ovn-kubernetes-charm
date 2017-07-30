@@ -76,9 +76,6 @@ def retrieve(key):
 		return data[key];
 
 def store(key, value):
-	conf = open('/tmp/ovn_conf', 'w+');
-	conf.close();
-
 	conf = open('/tmp/ovn_conf', 'r');
 	plain_text = conf.read();
 	conf.close();
@@ -397,9 +394,9 @@ def send_cert(cni, mconfig):
 	hookenv.status_set('maintenance', 'Waiting for certificate');
 	set_state('worker.cert.sent');
 
-@when('cni.is-worker')
+@when('cni.is-worker', 'deps.installed')
 @when_not('worker.kv.setup')
-def setup_worker_kv():
+def setup_worker_kv(cni):
 	interface = get_config('gateway-physical-interface');
 	if interface == 'none' or interface == None:
 		op = run_command('ip route | grep default').split(' ');
