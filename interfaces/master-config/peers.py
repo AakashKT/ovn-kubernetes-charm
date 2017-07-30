@@ -101,7 +101,7 @@ def store(key, value):
 
 class MasterConfigPeer(RelationBase):
 
-	scope = scopes.UNIT;
+	scope = scopes.GLOBAL;
 
 	@hook("{peers:master-config}-relation-{joined}")
 	def joined(self):

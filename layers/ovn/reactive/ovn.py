@@ -224,6 +224,9 @@ def master_setup(cni):
 	hookenv.open_ports(6444, 65535);
 
 	central_ip = get_my_ip();
+	run_command('sudo /usr/share/openvswitch/scripts/ovn-ctl start_northd');
+	run_command('sudo ovn-nbctl set-connection pssl:6641');
+	run_command('sudo ovn-sbctl set-connection pssl:6642');
 
 	os.chdir('/etc/openvswitch');
 	run_command('sudo ovs-pki -d /certs/pki init --force');
@@ -245,10 +248,6 @@ def master_setup(cni):
 		--ovn-controller-ssl-cert=/etc/openvswitch/ovncontroller-cert.pem \
 		--ovn-controller-ssl-bootstrap-ca-cert=/etc/openvswitch/ovnsb-ca.cert"');
 	ovn_host_file.close();
-
-	run_command('sudo /usr/share/openvswitch/scripts/ovn-ctl start_northd');
-	run_command('sudo ovn-nbctl set-connection pssl:6641');
-	run_command('sudo ovn-sbctl set-connection pssl:6642');
 
 	run_command('sudo ovs-vsctl set Open_vSwitch . external_ids:ovn-remote="ssl:%s:6642" \
 					external_ids:ovn-nb="ssl:%s:6641" \
