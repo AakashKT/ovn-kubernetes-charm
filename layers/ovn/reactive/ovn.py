@@ -120,7 +120,16 @@ def install_deps():
 
 
 
-''' Master reactive handlers '''
+''' Master reactive handlers and functions '''
+
+def get_worker_subnet():
+	ip3 = retrieve('ip3');
+	ip3_int = int(ip3);
+
+	new_ip3 = ip3_int + 1;
+	store('ip3', new_ip3);
+
+	return ip3;
 
 @when('master.initialised')
 def restart_services():
@@ -141,27 +150,35 @@ def sign_and_send(mconfig):
 
 	signed_certs = {};
 	for unit in data:
-		cert = unit['cert_to_sign'];
 		worker_hostname = unit['worker_hostname'];
 
-		os.chdir('/tmp/');
-		cert_file = open('/tmp/ovncontroller-req.pem', 'w+');
-		cert_file.truncate(0);
-		cert_file.seek(0, 0);
-		cert_file.write(cert);
-		cert_file.close();
-		run_command('sudo ovs-pki -d /certs/pki -b sign ovncontroller switch --force');
+		if not was_invoked(worker_hostname):
+			mark_invoked(worker_hostname);
+			cert = unit['cert_to_sign'];
 
-		cert_file = open('ovncontroller-cert.pem', 'r');
-		signed_cert = cert_file.read();
+			ip3 = get_worker_subnet();
+			worker_subnet = '192.168.%s.0/24' % (ip3);
 
-		signed_certs[worker_hostname] = {
-			"central_ip": central_ip,
-			"signed_cert": signed_cert,
-			"master_hostname": master_hostname, 
-		};
+			os.chdir('/tmp/');
+			cert_file = open('/tmp/ovncontroller-req.pem', 'w+');
+			cert_file.truncate(0);
+			cert_file.seek(0, 0);
+			cert_file.write(cert);
+			cert_file.close();
+			run_command('sudo ovs-pki -d /certs/pki -b sign ovncontroller switch --force');
+
+			cert_file = open('ovncontroller-cert.pem', 'r');
+			signed_cert = cert_file.read();
+
+			signed_certs[worker_hostname] = {
+				"central_ip": central_ip,
+				"signed_cert": signed_cert,
+				"master_hostname": master_hostname, 
+				"worker_subnet": worker_subnet,
+			};
 	
-	mconfig.send_signed_certs(signed_certs);
+	if bool(signed_certs) != False:
+		mconfig.send_signed_certs(signed_certs);
 
 @when('cni.is-master', 'master.initialised')
 @when_not('gateway.installed')
@@ -263,7 +280,7 @@ def master_setup(cni):
 
 	set_state('master.setup.done');
 
-@when('cni.is-master', 'deps.installed')
+@when('cni.is-master', 'master.kv.setup')
 @when_not('bridge.setup.done')
 def bridge_setup(cni):
 	hookenv.status_set('maintenance', 'Setting up new interface');
@@ -285,9 +302,15 @@ def bridge_setup(cni):
 	hookenv.status_set('maintenance', 'Waiting to initialise master');
 	set_state('bridge.setup.done');
 
+@when('cni.is-master', 'deps.installed')
+@when_not('master.kv.setup')
+def setup_master_kv(cni):
+	store('ip3', '2');
+
+	set_state('master.kv.setup');
 
 
-''' Worker reactive handlers '''
+''' Worker reactive handlers and functions '''
 
 @when('cni.is-worker', 'worker.data.registered')
 @when_not('k8s.worker.certs.setup')
@@ -312,13 +335,14 @@ def initialise_worker(cni):
 	hookenv.status_set('maintenance', 'Initialising worker network');
 
 	local_ip = get_my_ip();
+	worker_subnet = retrieve('worker_subnet');
 	central_ip = retrieve('central_ip');
 	hostname = run_command('hostname').replace('\n', '');
 
 	run_command('ovs-vsctl set Open_vSwitch . \
 				external_ids:k8s-api-server="%s:8080"' % (central_ip));
 	run_command('ovn-k8s-overlay minion-init --cluster-ip-subnet="192.168.0.0/16" \
-					--minion-switch-subnet="192.168.2.0/24" --node-name="%s"' % (hostname));
+					--minion-switch-subnet="%s" --node-name="%s"' % (worker_subnet, hostname));
 
 	os.chdir('/tmp/');
 	run_command('wget https://github.com/containernetworking/cni/releases/download/v0.5.2/cni-amd64-v0.5.2.tgz');
@@ -327,7 +351,7 @@ def initialise_worker(cni):
 	os.chdir('/opt/cni/bin/');
 	run_command('sudo tar xvzf /tmp/cni-amd64-v0.5.2.tgz');
 
-	hookenv.status_set('active', 'Worker subnet : 192.168.2.0/24');
+	hookenv.status_set('active', 'Worker subnet : %s' % (worker_subnet));
 	set_state('worker.initialised');
 
 @when('cni.is-worker', 'worker.data.registered', 'worker.kv.setup')
@@ -368,10 +392,12 @@ def receive_data(cni, mconfig):
 
 	data = mconfig.get_signed_cert(worker_hostname);
 	cert = data['signed_cert'];
+	worker_subnet = data['worker_subnet'];
 	master_ip = data['central_ip'];
 	master_hostname = data['master_hostname'];
 
 	store('master_hostname', master_hostname);
+	store('worker_subnet', worker_subnet);
 	store('central_ip', master_ip);
 	cni.set_config(cidr='192.168.0.0/16');
 

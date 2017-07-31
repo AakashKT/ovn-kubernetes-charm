@@ -113,7 +113,7 @@ class MasterConfigPeer(RelationBase):
 		hostname = run_command('hostname');
 
 		conv = self.conversation();
-		if conv.get_remote(hostname):
+		if conv.get_remote('data'):
 			conv.set_state("{relation_name}.master.data.available");
 		elif conv.get_remote('cert_to_sign'):
 			conv.set_state("{relation_name}.worker.cert.available");
@@ -156,9 +156,14 @@ class MasterConfigPeer(RelationBase):
 			conv.set_remote(key="data", value=certs_str);
 
 	def get_signed_cert(self, worker_hostname):
-		conv = self.conversation();
+		convs = self.conversations();
 		
-		data = conv.get_remote('data');
-		data = json.loads(data);
+		final = None;
+		for conv in convs:
+			data = conv.get_remote('data');
 
-		return data[worker_hostname];
+			if data != '' and data != None:
+				data = json.loads(data);
+				final = data;
+
+		return final[worker_hostname];
