@@ -73,8 +73,8 @@ def run_command(command=None):
         return False;
 
 def get_config(key):
-    config = config(key);
-    return config;
+    conf = config(key);
+    return conf;
 
 def retrieve(key):
     try:
@@ -336,7 +336,7 @@ def master_setup(cni):
 @when('cni.is-master', 'master.kv.setup')
 @when_not('bridge.setup.done')
 def bridge_setup(cni):
-    okenv.status_set('maintenance', 'Setting up new interface');
+    status_set('maintenance', 'Setting up new interface');
 
     interface = get_config('gateway-physical-interface');
     if interface == 'none' or interface == None:
