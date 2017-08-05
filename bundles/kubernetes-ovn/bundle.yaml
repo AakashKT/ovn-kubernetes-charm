@@ -14,15 +14,16 @@ applications:
 
   kubernetes-worker:
     charm: "cs:~containers/kubernetes-worker-40"
-    num_units: 1
+    num_units: 2
     to:
       - "1"
+      - "2"
     expose: true
     options:
       channel: 1.5/stable
 
   ovn:
-    charm: "cs:~aakashkt/ovn-13"
+    charm: "cs:~aakashkt/ovn-14"
     options:
       gateway-physical-interface: "none"
 
@@ -60,4 +61,6 @@ machines:
   "0":
     series: xenial
   "1":
+    series: xenial
+  "2":
     series: xenial
