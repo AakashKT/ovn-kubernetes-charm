@@ -111,7 +111,9 @@ class MasterConfigPeer(RelationBase):
     @hook("{peers:master-config}-relation-{changed}")
     def changed(self):
         conv = self.conversation();
-        if conv.get_remote('data'):
+        worker_id = conv.get_local(key='worker_id');
+
+        if worker_id != None and conv.get_remote(worker_id):
             conv.set_state("{relation_name}.master.data.available");
         elif conv.get_remote('cert_to_sign'):
             conv.set_state("{relation_name}.worker.cert.available");
@@ -121,8 +123,14 @@ class MasterConfigPeer(RelationBase):
         conv = self.conversation();
 
         conv.remove_state("{relation_name}.connected");
-        conv.remove_state("{relation_name}.master.ip.available");
+        conv.remove_state("{relation_name}.master.data.available");
         conv.remove_state("{relation_name}.worker.cert.available");
+
+    def set_worker_id(self, worker_id):
+        convs = self.conversations();
+
+        for conv in convs:
+            conv.set_local(key='worker_id', value=worker_id);
 
     def get_worker_data(self):
         convs = self.conversations();
@@ -149,19 +157,22 @@ class MasterConfigPeer(RelationBase):
 
 
     def send_signed_certs(self, certs):
-        certs_str = json.dumps(certs);
-        for conv in self.conversations():
-            conv.set_remote(key="data", value=certs_str);
+        convs = self.conversations();
+        for conv in convs:
+            for key, value in certs.items():
+                data_str = json.dumps(value);
+                conv.set_remote(key=key, value=data_str);
 
     def get_signed_cert(self, worker_hostname):
         convs = self.conversations();
         
         final = None;
         for conv in convs:
-            data = conv.get_remote('data');
+            data = conv.get_remote(worker_hostname);
 
             if data != '' and data != None:
                 data = json.loads(data);
                 final = data;
+                break;
 
-        return final[worker_hostname];
+        return final;

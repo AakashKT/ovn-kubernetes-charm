@@ -18,11 +18,6 @@ from charmhelpers.core.hookenv import (
     unit_private_ip,
 )
 
-from charms.leadership import (
-    leader_set,
-    leader_get,
-)
-
 from charmhelpers.core.host import (
     service_start,
     service_stop,
@@ -186,12 +181,12 @@ def sign_and_send(mconfig):
             signed_certs[worker_hostname] = {
                 "central_ip": central_ip,
                 "signed_cert": signed_cert,
-                "master_hostname": master_hostname, 
+                "master_hostname": master_hostname,
+                "worker_hostname": worker_hostname, 
                 "worker_subnet": worker_subnet,
             };
     
-    if bool(signed_certs) != False:
-        mconfig.send_signed_certs(signed_certs);
+    mconfig.send_signed_certs(signed_certs);
 
 @when('cni.is-master', 'master.initialised')
 @when_not('gateway.installed')
@@ -424,9 +419,11 @@ def receive_data(cni, mconfig):
 @when('cni.is-worker', 'master-config.connected', 'worker.kv.setup')
 @when_not('worker.cert.sent')
 def send_cert(cni, mconfig):
+    worker_hostname = run_command('hostname');
+    mconfig.set_worker_id(worker_hostname);
+
     os.chdir('/etc/openvswitch');
     run_command('sudo ovs-pki req ovncontroller');
-    worker_hostname = run_command('hostname');
 
     req_file = open('ovncontroller-req.pem', 'r');
     cert = req_file.read();
