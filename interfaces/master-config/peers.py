@@ -110,8 +110,6 @@ class MasterConfigPeer(RelationBase):
 
     @hook("{peers:master-config}-relation-{changed}")
     def changed(self):
-        hostname = run_command('hostname');
-
         conv = self.conversation();
         if conv.get_remote('data'):
             conv.set_state("{relation_name}.master.data.available");

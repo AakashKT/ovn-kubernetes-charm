@@ -10,14 +10,17 @@ import multiprocessing as mp
 from charmhelpers.core import host
 
 from charmhelpers.core.hookenv import (
-    is_leader,
     open_port,
+    open_ports,
     status_set,
-    leader_set,
-    leader_get,
     config,
     unit_public_ip,
     unit_private_ip,
+)
+
+from charms.leadership import (
+    leader_set,
+    leader_get,
 )
 
 from charmhelpers.core.host import (
@@ -152,48 +155,6 @@ def restart_services():
                     --physical-interface=%s \
                     --pidfile --detach' % (new_interface, old_interface));
 
-''' Handle certificate requests using the leader election layer '''
-
-@when('master.initialised', 'leadership.is_leader')
-def sign_and_send():
-    data = json.loads(leader_get('data'));
-    central_ip = get_my_ip();
-    master_hostname = run_command('hostname');
-
-    for unit in data:
-        worker_hostname = unit['worker_hostname'];
-        if not was_invoked(worker_hostname):
-            mark_invoked(worker_hostname);
-            cert = unit['cert_to_sign'];
-
-            ip3 = get_worker_subnet();
-            worker_subnet = '192.168.%s.0/24' % (ip3);
-
-            os.chdir('/tmp/');
-            cert_file = open('/tmp/ovncontroller-req.pem', 'w+');
-            cert_file.truncate(0);
-            cert_file.seek(0, 0);
-            cert_file.write(cert);
-            cert_file.close();
-            run_command('sudo ovs-pki -d /certs/pki -b sign ovncontroller switch --force');
-
-            cert_file = open('ovncontroller-cert.pem', 'r');
-            signed_cert = cert_file.read();
-
-            final_cert = {
-                "central_ip": central_ip,
-                "signed_cert": signed_cert,
-                "master_hostname": master_hostname, 
-                "worker_subnet": worker_subnet,
-            };
-            leader_set({
-                worker_hostname: json.dumps(final_cert),
-            });
-
-
-
-''' Handle certificate requests using the master config layer '''
-'''
 @when('master.initialised', 'master-config.worker.cert.available')
 def sign_and_send(mconfig):
     data = mconfig.get_worker_data();
@@ -231,7 +192,6 @@ def sign_and_send(mconfig):
     
     if bool(signed_certs) != False:
         mconfig.send_signed_certs(signed_certs);
-'''
 
 @when('cni.is-master', 'master.initialised')
 @when_not('gateway.installed')
@@ -407,7 +367,7 @@ def initialise_worker(cni):
     status_set('active', 'Worker subnet : %s' % (worker_subnet));
     set_state('worker.initialised');
 
-@when('cni.is-worker', 'worker.data.registered', 'worker.kv.setup')
+@when('cni.is-worker', 'worker.data.registered')
 @when_not('worker.setup.done')
 def worker_setup(cni):
     status_set('maintenance', 'Setting up worker');
@@ -437,66 +397,7 @@ def worker_setup(cni):
                     restart_controller');
     set_state('worker.setup.done');
 
-
-
-
-''' Exchange of certs using the leader-election layer '''
-
-@when('cni.is-worker', 'leadership.set.%s' % retrieve('worker_hostname'), 
-            'worker.cert.sent')
-@when_not('worker.data.registered')
-def receive_data(cni):
-    status_set('maintenance', 'Certificate received')
-    worker_hostname = retrieve('worker_hostname');
-
-    data = json.loads(leader_get(worker_hostname));
-    cert = data['signed_cert'];
-    worker_subnet = data['worker_subnet'];
-    master_ip = data['central_ip'];
-    master_hostname = data['master_hostname'];
-
-    store('master_hostname', master_hostname);
-    store('worker_subnet', worker_subnet);
-    store('central_ip', master_ip);
-    cni.set_config(cidr='192.168.0.0/16');
-
-    os.chdir('/etc/openvswitch');
-    cert_file = open('/etc/openvswitch/ovncontroller-cert.pem', 'a');
-    cert_file.write(cert);
-    cert_file.close();
-
-    set_state('worker.data.registered');
-
-@when('cni.is-worker', 'leadership.is_leader', 'worker.kv.setup')
-@when_not('worker.cert.sent')
-def send_cert(cni):
-    os.chdir('/etc/openvswitch');
-    run_command('sudo ovs-pki req ovncontroller');
-    worker_hostname = retrieve('worker_hostname');
-
-    req_file = open('ovncontroller-req.pem', 'r');
-    cert = req_file.read();
-
-    leader_data = json.loads(leader_get('data'));
-    leader_data.append({
-        'cert_to_sign': cert,
-        'worker_hostname': worker_hostname
-    });
-    leader_set({
-        'data': json.dumps(data),
-    });
-
-    status_set('maintenance', 'Waiting for certificate');
-    set_state('worker.cert.sent');
-
-
-
-
-
-''' Exchange of certs using the master-config relation '''
-'''
-
-@when('cni.is-worker', 'master-config.master.data.available')
+@when('cni.is-worker', 'master-config.master.data.available', 'worker.cert.sent')
 @when_not('worker.data.registered')
 def receive_data(cni, mconfig):
     status_set('maintenance', 'Certificate received')
@@ -536,7 +437,6 @@ def send_cert(cni, mconfig):
 
     status_set('maintenance', 'Waiting for certificate');
     set_state('worker.cert.sent');
-'''
 
 @when('cni.is-worker', 'deps.installed')
 @when_not('worker.kv.setup')
