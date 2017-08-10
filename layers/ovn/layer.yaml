@@ -1,2 +1,2 @@
-includes: ['layer:basic', 'layer:openvswitch',
-              'interface:kubernetes-cni', 'interface:master-config']  # if you use any interfaces, add them here
+includes: ['layer:basic', 'interface:kubernetes-cni', 'interface:master-config']
+repo: 'https://github.com/AakashKT/charm-ovn.git'

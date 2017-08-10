@@ -1,4 +1,4 @@
 name : master-config
-summary : TO BE ADDED
+summary : Master config peer relation for OVN charm
 version : 1
-maintainer : Aakash KT <aakashkt0@gmail.com>
+maintainer : Aakash KT <aakashkt0@gmail.com> <aakash.kt@research.iiit.ac.in>

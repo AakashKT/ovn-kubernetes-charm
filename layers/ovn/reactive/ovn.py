@@ -114,10 +114,42 @@ def store(key, value):
 
 @when_not('deps.installed')
 def install_deps():
-    status_set('maintenance', 'Installing dependencies for OVN');
+    status_set('maintenance', 'Installing dependencies');
 
     conf = open('/tmp/ovn_conf', 'w+');
     conf.close();
+
+    run_command('sudo apt-get update ; sudo apt-get upgrade ; sudo apt-get install git -y');
+    run_command('sudo apt-get install -y build-essential fakeroot debhelper \
+                    autoconf automake bzip2 libssl-dev docker.io \
+                    openssl graphviz python-all procps \
+                    python-dev python-setuptools python-pip python3 python3.4 \
+                    python-twisted-conch libtool git dh-autoreconf \
+                    linux-headers-$(uname -r) libcap-ng-dev');
+    run_command('sudo pip2 install six');
+
+    status_set('maintenance', 'Configure and make openvswitch');
+    run_command('git clone https://github.com/openvswitch/ovs.git /tmp/ovs');
+
+    os.chdir('/tmp/ovs');
+
+    run_command('./boot.sh');
+    run_command('./configure --prefix=/usr --localstatedir=/var  --sysconfdir=/etc \
+                        --enable-ssl --with-linux=/lib/modules/`uname -r`/build');
+    run_command('make -j3 ; sudo make install ; sudo make modules_install');
+
+    status_set('maintenance', 'Replacing kernel module');
+
+    run_command('sudo mkdir /etc/depmod.d/');
+    run_command('for module in datapath/linux/*.ko; \
+                    do modname="$(basename ${module})" ; \
+                    echo "override ${modname%.ko} * extra" >> "/etc/depmod.d/openvswitch.conf" ; \
+                    echo "override ${modname%.ko} * weak-updates" >> "/etc/depmod.d/openvswitch.conf" ; \
+                    done');
+    run_command('/sbin/modprobe openvswitch');
+
+    run_command('/usr/share/openvswitch/scripts/ovs-ctl start --system-id=$(uuidgen)');
+    status_set('maintenance', 'Open vSwitch Installed');
 
     run_command('git clone https://github.com/openvswitch/ovn-kubernetes /tmp/ovn-kubernetes');
     os.chdir('/tmp/ovn-kubernetes');
@@ -127,17 +159,13 @@ def install_deps():
 
 
 
-
 ''' Master reactive handlers and functions '''
 
 def get_worker_subnet():
-    ip3 = retrieve('ip3');
-    ip3_int = int(ip3);
+    ip3 = int(retrieve('ip3'));
+    store('ip3', ip3+1);
 
-    new_ip3 = ip3_int + 1;
-    store('ip3', new_ip3);
-
-    return ip3;
+    return '192.168.%s.0/24' % ip3;
 
 @when('master.initialised')
 def restart_services():
@@ -163,9 +191,7 @@ def sign_and_send(mconfig):
         if not was_invoked(worker_hostname):
             mark_invoked(worker_hostname);
             cert = unit['cert_to_sign'];
-
-            ip3 = get_worker_subnet();
-            worker_subnet = '192.168.%s.0/24' % (ip3);
+            worker_subnet = get_worker_subnet();
 
             os.chdir('/tmp/');
             cert_file = open('/tmp/ovncontroller-req.pem', 'w+');
@@ -246,9 +272,9 @@ def initialise_master(cni):
 @when_not('master.setup.done')
 def master_setup(cni):
     status_set('maintenance', 'Setting up master');
-    open_ports(1, 2378);
-    open_ports(2380, 6442);
-    open_ports(6444, 65535);
+    open_port(6641);
+    open_port(6642);
+    open_port(8080);
 
     central_ip = get_my_ip();
     run_command('sudo /usr/share/openvswitch/scripts/ovn-ctl start_northd');
@@ -366,9 +392,7 @@ def initialise_worker(cni):
 @when_not('worker.setup.done')
 def worker_setup(cni):
     status_set('maintenance', 'Setting up worker');
-    open_ports(1, 79);
-    open_ports(81, 442);
-    open_ports(444, 65535);
+    open_port(8080);
 
     central_ip = retrieve('central_ip');
     local_ip = get_my_ip();

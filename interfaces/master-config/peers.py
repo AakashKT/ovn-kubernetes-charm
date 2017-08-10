@@ -7,8 +7,16 @@ import time
 import urllib.request as urllib2
 import multiprocessing as mp
 
-from charmhelpers.core import hookenv
 from charmhelpers.core import host
+
+from charmhelpers.core.hookenv import (
+    open_port,
+    open_ports,
+    status_set,
+    config,
+    unit_public_ip,
+    unit_private_ip,
+)
 
 from charmhelpers.core.host import (
     service_start,
@@ -24,6 +32,11 @@ from charmhelpers.fetch import (
     apt_upgrade
 )
 
+from charms.reactive.helpers import (
+    mark_invoked,
+    was_invoked,
+)
+
 from charms.reactive import (
     when,
     when_not,
@@ -34,6 +47,7 @@ from charms.reactive import (
     set_state,
     remove_state
 )
+
 
 
 CONF_FILE = '/tmp';
@@ -57,8 +71,8 @@ def run_command(command=None):
         return False;
 
 def get_config(key):
-    config = hookenv.config(key);
-    return config;
+    conf = config(key);
+    return conf;
 
 def retrieve(key):
     try:
@@ -75,9 +89,6 @@ def retrieve(key):
         return data[key];
 
 def store(key, value):
-    conf = open('/tmp/ovn_conf', 'w+');
-    conf.close();
-
     conf = open('/tmp/ovn_conf', 'r');
     plain_text = conf.read();
     conf.close();

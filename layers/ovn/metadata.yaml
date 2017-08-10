@@ -1,12 +1,10 @@
 name: ovn
-summary: <Fill in summary here>
-maintainer: Aakash <Aakash@localhost>
+summary: SDN via OVN
+maintainer: Aakash <aakashkt0@gmail.com>
 description: |
-  <Multi-line description here>
+  Overlay networking via OVN and OVS
 tags:
-  # Replace "misc" with one or more whitelisted tags from this list:
-  # https://jujucharms.com/docs/stable/authors-charm-metadata
-  - misc
+  - networking
 subordinate: true
 requires:
   cni:
