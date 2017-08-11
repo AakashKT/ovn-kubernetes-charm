@@ -8,6 +8,9 @@ applications:
     num_units: 1
     to:
       - "3"
+    annotations:
+      gui-x: '450'
+      gui-y: '250'
 
   kubernetes-master:
     charm: "cs:~containers/kubernetes-master-35"
@@ -18,6 +21,9 @@ applications:
     options:
       service-cidr: 192.168.200.0/24
       channel: 1.5/stable
+    annotations:
+      gui-x: '800'
+      gui-y: '850'
 
   kubernetes-worker:
     charm: "cs:~containers/kubernetes-worker-40"
@@ -28,23 +34,35 @@ applications:
     expose: true
     options:
       channel: 1.5/stable
+    annotations:
+      gui-x: '100'
+      gui-y: '850'
 
   ovn:
     charm: "cs:~aakashkt/ovn-16"
     options:
       gateway-physical-interface: "none"
+    annotations:
+      gui-x: '450'
+      gui-y: '750'
 
   etcd:
     charm: "cs:~containers/etcd-40"
     num_units: 1
     to:
       - "0"
+    annotations:
+      gui-x: '800'
+      gui-y: '550'
 
   easyrsa:
     charm: "cs:~containers/easyrsa-12"
     num_units: 1
     to:
       - "1"
+    annotations:
+      gui-x: '450'
+      gui-y: '550'
 
 relations:
   - - "kubernetes-master:kube-api-endpoint"
